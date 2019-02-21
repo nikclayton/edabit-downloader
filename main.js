@@ -46,22 +46,22 @@ Apify.main(async () => {
                 return;
             }
 
-            console.log('Waiting for button');
-            await page.waitForSelector(/*'div.ui.container button'*/'a.content', {timeout: 0})
-                .then(() => console.log('Button appeared'));
-            console.log(`Match: ${pseudoUrls[0].matches('https://edabit.com/challenge/ARr5tA458o2tC9FTN')}`)
-            const links = await Apify.utils.enqueueLinks({
-                page,
-                requestQueue,
-                selector: 'a.content',
-                pseudoUrls: pseudoUrls,
-                userData: {
-                    label: 'CHALLENGE',
-                    difficulty: await page.$eval('div.difficulty', el => el.innerText)
-                }
-            });
+
+            while (await page.waitForSelector('button.ui.fluid.button', {timeout: 5000})) {
+                await Apify.utils.enqueueLinks({
+                    page,
+                    requestQueue,
+                    selector: 'a.content',
+                    pseudoUrls: pseudoUrls,
+                    userData: {
+                        label: 'CHALLENGE',
+                        difficulty: await page.$eval('div.difficulty', el => el.innerText)
+                    }
+                });
+                await page.$eval('button.ui.fluid.button', el => el.click());
+            }
         },
-        maxRequestsPerCrawl: 50,
+        maxRequestsPerCrawl: 500,
         maxConcurrency: 10,
     });
 
